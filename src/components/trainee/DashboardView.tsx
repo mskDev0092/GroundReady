@@ -1,0 +1,246 @@
+"use client";
+
+import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import { BADGES, LEVELS, levelFromXp, nextLevel } from "@/data/gamification";
+import { SCENARIOS, isUnlocked } from "@/data/scenarios";
+import type { ScenarioProgress } from "@/lib/types";
+import {
+  Award,
+  Flame,
+  Lock,
+  Play,
+  Star,
+  Target,
+  Trophy,
+} from "lucide-react";
+
+export function DashboardView({
+  xp,
+  streak,
+  badges,
+  progress,
+  newlyUnlocked,
+  onClearNew,
+  onStart,
+  onBrowse,
+}: {
+  xp: number;
+  streak: number;
+  badges: string[];
+  progress: Record<string, ScenarioProgress>;
+  newlyUnlocked: string[];
+  onClearNew: () => void;
+  onStart: (id: string) => void;
+  onBrowse: () => void;
+}) {
+  const level = levelFromXp(xp);
+  const next = nextLevel(xp);
+  const lvlIdx = LEVELS.findIndex((l) => l.level === level.level);
+  const levelSpanEnd = next?.minXp ?? xp;
+  const levelSpanStart = level.minXp;
+  const pct = next
+    ? Math.round(((xp - levelSpanStart) / (levelSpanEnd - levelSpanStart)) * 100)
+    : 100;
+  const completedCount = useMemo(
+    () => Object.values(progress).filter((p) => p.completed).length,
+    [progress],
+  );
+  const nextScenario = SCENARIOS.find(
+    (s) => !progress[s.id]?.completed && isUnlocked(s, progress),
+  );
+
+  return (
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
+      {newlyUnlocked.length > 0 && (
+        <div className="flex items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3">
+          <Trophy className="h-6 w-6 shrink-0 text-amber-500" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+              New badge unlocked!
+            </p>
+            <p className="truncate text-xs text-amber-700/80 dark:text-amber-400/80">
+              {newlyUnlocked
+                .map((id) => BADGES.find((b) => b.id === id)?.name)
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
+          <Button size="sm" variant="ghost" onClick={onClearNew}>
+            Dismiss
+          </Button>
+        </div>
+      )}
+
+      {/* level hero */}
+      <div className="rounded-xl border bg-gradient-to-br from-emerald-500/10 via-card to-card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">
+              Active Duty Status
+            </p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">
+              Level {level.level} — {level.title}
+            </h1>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {next
+                ? `${next.minXp - xp} XP to Level ${next.level} — ${next.title}`
+                : "Top of the ladder — the ramp salutes you."}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="font-mono text-3xl font-bold text-emerald-500">{xp}</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Total XP</p>
+          </div>
+        </div>
+        <Progress value={pct} className="mt-4 h-2" />
+        <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
+          {LEVELS.map((l, i) => (
+            <span key={l.level} className={cn(i === lvlIdx && "font-bold text-emerald-500")}>
+              L{i + 1}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* stat cards */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard icon={<Star className="h-4 w-4 text-amber-500" />} label="Streak" value={`${streak} clean`} />
+        <StatCard icon={<Target className="h-4 w-4 text-emerald-500" />} label="Completed" value={`${completedCount}/${SCENARIOS.length}`} />
+        <StatCard icon={<Award className="h-4 w-4 text-violet-500" />} label="Badges" value={`${badges.length}/${BADGES.length}`} />
+        <StatCard icon={<Flame className="h-4 w-4 text-red-500" />} label="Career" value={`${Math.round(Object.values(progress).reduce((a, p) => a + p.totalXp, 0))} XP earned`} />
+      </div>
+
+      {/* badges shelf */}
+      <div>
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Badge Cabinet
+        </h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {BADGES.map((b) => {
+            const owned = badges.includes(b.id);
+            return (
+              <div
+                key={b.id}
+                className={cn(
+                  "rounded-lg border p-3 transition",
+                  owned ? "border-amber-500/40 bg-amber-500/5" : "bg-card/40 opacity-70",
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={cn(
+                      "text-2xl",
+                      !owned && "grayscale opacity-40",
+                    )}
+                    aria-hidden
+                  >
+                    {b.icon}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold leading-tight">{b.name}</p>
+                    <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                      {owned ? b.description : `🔒 ${b.requirement}`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* progress list */}
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Scenario Progress
+          </h2>
+          <Button size="sm" variant="ghost" className="text-xs" onClick={onBrowse}>
+            Browse all
+          </Button>
+        </div>
+        <div className="overflow-hidden rounded-lg border">
+          {SCENARIOS.map((s, i) => {
+            const p = progress[s.id];
+            const unlocked = isUnlocked(s, progress);
+            return (
+              <div
+                key={s.id}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5",
+                  i > 0 && "border-t",
+                )}
+              >
+                <Badge variant="outline" className="w-16 shrink-0 justify-center font-mono text-[10px]">
+                  M{s.moduleNo}
+                </Badge>
+                <div className="min-w-0 flex-1">
+                  <p className={cn("truncate text-[13px] font-medium", !unlocked && "text-muted-foreground")}>
+                    {s.title}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {unlocked
+                      ? p
+                        ? `Best ${p.bestAccuracy}% · ${p.attempts} attempt${p.attempts > 1 ? "s" : ""} · ${p.totalXp} XP`
+                        : "Not attempted"
+                      : "Complete the previous module to unlock"}
+                  </p>
+                </div>
+                {p?.completed && p.bestAccuracy >= 90 ? (
+                  <Badge className="shrink-0 bg-amber-500/15 text-amber-600 border border-amber-500/30" variant="outline">
+                    MASTERED
+                  </Badge>
+                ) : p?.completed ? (
+                  <Badge variant="outline" className="shrink-0">{p.bestAccuracy}%</Badge>
+                ) : null}
+                {unlocked ? (
+                  <Button
+                    size="sm"
+                    className="h-7 shrink-0 gap-1 text-[11px]"
+                    onClick={() => onStart(s.id)}
+                  >
+                    <Play className="h-3 w-3" />
+                    {p?.completed ? "Replay" : "Start"}
+                  </Button>
+                ) : (
+                  <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {nextScenario && (
+        <Button size="lg" className="mx-auto gap-2" onClick={() => onStart(nextScenario.id)}>
+          <Play className="h-4 w-4" />
+          Continue training — {nextScenario.code}: {nextScenario.title}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-lg border bg-card/60 p-3">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        {icon}
+        <span className="text-[10px] uppercase tracking-widest">{label}</span>
+      </div>
+      <p className="mt-1 font-mono text-lg font-bold">{value}</p>
+    </div>
+  );
+}
