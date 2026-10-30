@@ -24,6 +24,7 @@ import {
   type CommandAttemptState,
 } from "@/lib/altea";
 import { scenarioMaxPoints } from "@/data/scenarios";
+import { buildScenarioResult } from "@/lib/scoring";
 import type {
   ChatMessage,
   DecisionOption,
@@ -121,31 +122,17 @@ export function SimView({
   /* ------------------------------- step flow ------------------------------- */
 
   const finish = useCallback(() => {
-      const finalEarned = earnedRef.current;
-      const finalMistakes = mistakesRef.current;
-      const hints = hintsRef.current;
-      const durationSec = Math.max(1, Math.floor((Date.now() - startedAt.current) / 1000));
-      const accuracy = Math.max(0, Math.min(100, Math.round((finalEarned / total) * 100)));
-      const underPar = durationSec <= scenario.minutes * 60;
-      const speedBonus = underPar && accuracy >= 60 ? Math.round(scenario.xpBase * 0.1) : 0;
-      const xpAwarded = Math.round((scenario.xpBase * accuracy) / 100) + speedBonus;
-      const result: ScenarioResult = {
-        scenarioId: scenario.id,
-        earned: finalEarned,
-        total,
-        accuracy,
-        xpAwarded,
-        speedBonus,
-        hintsUsed: hints,
-        mistakes: finalMistakes,
-        durationSec,
-        badgeUnlocked: accuracy >= 90 ? scenario.badgeId : undefined,
-      };
+      const result = buildScenarioResult(scenario, {
+        earned: earnedRef.current,
+        hintsUsed: hintsRef.current,
+        mistakes: mistakesRef.current,
+        durationSec: Math.max(1, Math.floor((Date.now() - startedAt.current) / 1000)),
+      });
       setPhase("done");
       play(sfx.success);
       later_(() => onFinish(result), 900);
     },
-    [total, scenario, play, later_, onFinish]
+    [scenario, play, later_, onFinish]
   );
 
   const enterStep = useCallback(

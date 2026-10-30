@@ -205,13 +205,13 @@ export const scenarioUMNR: Scenario = {
     },
     {
       type: "decision",
-      id: "m12-d2",
+      id: "m12-d2b",
       prompt: "The father asks to walk her to the aircraft. Choose the correct handover.",
       situation:
         "'Please — let me take her to the plane door myself. I will come back out immediately, I promise.' He has no boarding pass; the ASD line is behind him.",
       options: [
         {
-          id: "m12-d2-a",
+          id: "m12-d2b-a",
           text: "Only ticketed passengers pass the ASD, sir — but here is what actually happens: I will take her through security on the UM escort lane, she boards FIRST before general boarding, and I hand her to the purser BY NAME — face to face, not a wave across the aisle. You wait at the window by gate A03 until the aircraft pushes back, and her grandmother gets a call from our ISB agent the moment Zainab is in her arms. Every metre is witnessed; that is the chain you are trusting.",
           points: 16,
           feedback:
@@ -221,7 +221,7 @@ export const scenarioUMNR: Scenario = {
           best: true,
         },
         {
-          id: "m12-d2-b",
+          id: "m12-d2b-b",
           text: "Fine, walk her to the aircraft — but come straight back, and do not tell anyone I let you.",
           points: 0,
           feedback:
@@ -229,7 +229,7 @@ export const scenarioUMNR: Scenario = {
           best: false,
         },
         {
-          id: "m12-d2-c",
+          id: "m12-d2b-c",
           text: "Point at security: 'Through there, she can manage, the crew will see her.'",
           points: 0,
           feedback:
