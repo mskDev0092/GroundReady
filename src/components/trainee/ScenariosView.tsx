@@ -29,7 +29,8 @@ export function ScenariosView({
       <div>
         <h1 className="text-xl font-bold tracking-tight">Scenario Catalog</h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          IATA 2026 · GACA · SAPS SOPs — five counter-to-gate drills. Modules unlock in order.
+          IATA 2026 · GACA · SAPS SOPs — {SCENARIOS.length} counter-to-gate drills across{" "}
+          {CATEGORY_ORDER.length} disciplines, from Zamzam rules to document fraud. Modules unlock in order.
         </p>
       </div>
 

@@ -20,6 +20,14 @@ export const GENERIC_COMMANDS = [
   { display: "SEC/<NAME>/CLR", description: "Clear security flag (after AVSEC)" },
   { display: "BD/<citypair>/<DDMMM>-<seat>", description: "Board a passenger into seat" },
   { display: "EMD-EXC/<kg>/<amount>", description: "Issue Excess Baggage EMD" },
+  { display: "EMD-MEAL/P<n>/<amount>", description: "Issue meal-care EMD (IRROPS)" },
+  { display: "TI DOC/<CC>", description: "TIMATIC document/visa check by country" },
+  { display: "NM/1<NAME>", description: "Correct passenger name element (minor edit)" },
+  { display: "BIP/P<n>", description: "Boarding pass issue for passenger n" },
+  { display: "XX/P<n>", description: "Offload / cancel accepted passenger n" },
+  { display: "LMC-<n>/<text>", description: "Last-minute-change message to load control" },
+  { display: "RB/P<n>/<flight>/<DDMMM>/<class>", description: "Rebook passenger (IRROPS)" },
+  { display: "LI/NB", description: "List no-board passengers for the flight" },
 ];
 
 export function normalizeEntry(raw: string): string {

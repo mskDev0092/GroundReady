@@ -9,7 +9,10 @@ export type ScenarioCategory =
   | "baggage-dgr"
   | "documentation"
   | "overbooking"
-  | "gate-ops";
+  | "gate-ops"
+  | "special-pax"
+  | "irrops"
+  | "security";
 
 export const CATEGORY_META: Record<
   ScenarioCategory,
@@ -38,6 +41,24 @@ export const CATEGORY_META: Record<
     short: "GTE",
     description:
       "Boarding gate security flags, SSSS protocol and departure control.",
+  },
+  "special-pax": {
+    label: "Special & Medical",
+    short: "SPX",
+    description:
+      "UMNR minors, PRM wheelchair handling, MEDA cases and pregnancy rules.",
+  },
+  irrops: {
+    label: "Disruption & IRROPS",
+    short: "IRR",
+    description:
+      "Cancellations, fog, rebooking cascades, care codes and re-protection.",
+  },
+  security: {
+    label: "Security & Compliance",
+    short: "SEC",
+    description:
+      "Document fraud detection, quiet escalation and ASF coordination.",
   },
 };
 
@@ -152,7 +173,14 @@ export type ActionIcon =
   | "lock"
   | "volunteer"
   | "list"
-  | "clock";
+  | "clock"
+  | "rebook"
+  | "medic"
+  | "wheelchair"
+  | "child"
+  | "hotel"
+  | "meal"
+  | "docs";
 
 export interface DecisionOption {
   id: string;

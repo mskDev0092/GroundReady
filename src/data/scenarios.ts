@@ -4,6 +4,17 @@ import { scenarioExcessBaggage } from "./scenarios-module2";
 import { scenarioDryIceUK } from "./scenarios-module3";
 import { scenarioOverbooking } from "./scenarios-module4";
 import { scenarioSSSS } from "./scenarios-module5";
+import { scenarioLithium } from "./scenarios-module6";
+import { scenarioCricket } from "./scenarios-module7";
+import { scenarioValidity } from "./scenarios-module8";
+import { scenarioNameFix } from "./scenarios-module9";
+import { scenarioIDB } from "./scenarios-module10";
+import { scenarioNoShow } from "./scenarios-module11";
+import { scenarioUMNR } from "./scenarios-module12";
+import { scenarioPRM } from "./scenarios-module13";
+import { scenarioMEDA } from "./scenarios-module14";
+import { scenarioFog } from "./scenarios-module15";
+import { scenarioDocFraud } from "./scenarios-module16";
 
 export const SCENARIOS: Scenario[] = [
   scenarioZamzam,
@@ -11,6 +22,17 @@ export const SCENARIOS: Scenario[] = [
   scenarioDryIceUK,
   scenarioOverbooking,
   scenarioSSSS,
+  scenarioLithium,
+  scenarioCricket,
+  scenarioValidity,
+  scenarioNameFix,
+  scenarioIDB,
+  scenarioNoShow,
+  scenarioUMNR,
+  scenarioPRM,
+  scenarioMEDA,
+  scenarioFog,
+  scenarioDocFraud,
 ];
 
 export const CATEGORY_ORDER: ScenarioCategory[] = [
@@ -18,6 +40,9 @@ export const CATEGORY_ORDER: ScenarioCategory[] = [
   "documentation",
   "overbooking",
   "gate-ops",
+  "special-pax",
+  "irrops",
+  "security",
 ];
 
 export function getScenario(id: string): Scenario | undefined {

@@ -5,9 +5,15 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { ActionIcon, DecisionOption } from "@/lib/types";
 import {
+  Accessibility,
+  Baby,
+  BedDouble,
+  CalendarClock,
   ClipboardCheck,
   Clock,
+  FileWarning,
   Handshake,
+  HeartPulse,
   Lightbulb,
   ListOrdered,
   Lock,
@@ -21,6 +27,7 @@ import {
   Ticket,
   UserRound,
   UserPlus,
+  UtensilsCrossed,
 } from "lucide-react";
 
 export function iconFor(icon: ActionIcon | undefined, className = "h-4 w-4") {
@@ -40,6 +47,13 @@ export function iconFor(icon: ActionIcon | undefined, className = "h-4 w-4") {
     volunteer: <UserPlus className={className} />,
     list: <ListOrdered className={className} />,
     clock: <Clock className={className} />,
+    rebook: <CalendarClock className={className} />,
+    medic: <HeartPulse className={className} />,
+    wheelchair: <Accessibility className={className} />,
+    child: <Baby className={className} />,
+    hotel: <BedDouble className={className} />,
+    meal: <UtensilsCrossed className={className} />,
+    docs: <FileWarning className={className} />,
   };
   return (icon && map[icon]) ?? <ClipboardCheck className={className} />;
 }
