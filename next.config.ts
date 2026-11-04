@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Required by the production start script.
-  output: "standalone",
-  typescript: {
-    ignoreBuildErrors: true,
+  output: process.env.NEXT_STATIC_EXPORT === "true" ? "export" : "standalone",
+  basePath: process.env.NEXT_BASE_PATH || undefined,
+  images: {
+    unoptimized: process.env.NEXT_STATIC_EXPORT === "true",
   },
   reactStrictMode: false,
 };
