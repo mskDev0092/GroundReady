@@ -17,7 +17,7 @@ export const scenarioDryIceUK: Scenario = {
   summary:
     "A UK-bound passenger checks a cool-box of frozen home-cooked Siri Paye and Nihari packed with 3 kg of dry ice. TIMATIC and IATA DGR 2026 both have something to say.",
   briefing:
-    "You are the SAPS Traffic Assistant at Lahore (LHE) row 1, flight PK 757 LHE–LHR. Mrs Ayesha Siddiqui checks one cool-box: 8 kg of frozen home-cooked meat dishes (Siri Paye, Nihari) chilled with 3 kg of DRY ICE (UN 1845, Class 9). Run the TIMATIC customs check for the UK, apply IATA DGR 65th Edition dry-ice limits (2.5 kg max per package, ventilated, leak-proof outer packaging, LRT with CO₂ notation), and handle the biosecurity refusal with care.",
+    "You are the SAPS Traffic Assistant at Lahore (LHE) row 1, flight PK 757 LHE–LHR. Mrs Ayesha Siddiqui checks one cool-box: 8 kg of frozen home-cooked meat dishes (Siri Paye, Nihari) chilled with 3 kg of DRY ICE (UN 1845, Class 9). Run the TIMATIC customs check for the UK, apply IATA DGR 67th Edition dry-ice limits (2.5 kg max per package, ventilated, leak-proof outer packaging, LRT with CO₂ notation), and handle the biosecurity refusal with care.",
   objectives: [
     "Run TIMATIC customs lookup (TI CUSTOMS/UK) before accepting food items",
     "Apply the UK Border Force ban on personal meat imports from non-EU countries",
@@ -203,7 +203,7 @@ export const scenarioDryIceUK: Scenario = {
       prompt:
         "She keeps the cool-box but drops the food. Now fix the DGR problem: she still has 3.0 kg of dry ice.",
       situation:
-        "IATA DGR 65th Edition: dry ice (UN 1845) checked baggage — max 2.5 kg PER PACKAGE, packaging must release CO₂ gas, outer packaging leak-proof, LRT with CO₂ notation required.",
+        "IATA DGR 67th Edition: dry ice (UN 1845) checked baggage — max 2.5 kg PER PACKAGE, packaging must release CO₂ gas, outer packaging leak-proof, LRT with CO₂ notation required.",
       options: [
         {
           id: "s3-d3-a",
@@ -278,7 +278,7 @@ export const scenarioDryIceUK: Scenario = {
         "Prohibited at the border regardless of cooking; items are seized (and destroyed) and penalties can apply. Verify with TIMATIC (TI CUSTOMS/UK) before acceptance.",
     },
     {
-      source: "IATA DGR 65th Edition (2026)",
+      source: "IATA DGR 67th Edition (2026)",
       ref: "Class 9 — UN 1845 Dry Ice, PI 954",
       detail:
         "Checked baggage: max 2.5 kg per package; packaging must vent CO₂ gas (not airtight); leak-proof outer packaging for melt-water; net weight marked; LRT with CO₂ notation.",

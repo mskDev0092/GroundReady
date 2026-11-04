@@ -51,7 +51,7 @@ describe("Full campaign progression", () => {
     expect(state.streak).toBe(SCENARIOS.length);
     expect(state.xp).toBe(expectedXp);
     expect(state.xp).toBeLessThanOrEqual(MAX_XP);
-    expect(levelFromXp(state.xp).level).toBe(5);
+    expect(levelFromXp(state.xp).level).toBe(6);
 
     for (const scenario of SCENARIOS) {
       expect(isUnlocked(scenario, state.progress)).toBe(true);

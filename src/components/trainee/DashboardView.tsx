@@ -7,9 +7,11 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { BADGES, LEVELS, levelFromXp, nextLevel } from "@/data/gamification";
 import { SCENARIOS, isUnlocked } from "@/data/scenarios";
-import type { ScenarioProgress } from "@/lib/types";
+import { ACADEMY_QUESTIONS, ACADEMY_TRACKS, overallAccuracy, trackProgress, TRACK_META } from "@/data/academy";
+import type { AcademyStats, ScenarioProgress } from "@/lib/types";
 import {
   Award,
+  Brain,
   Flame,
   Lock,
   Play,
@@ -23,19 +25,23 @@ export function DashboardView({
   streak,
   badges,
   progress,
+  academy,
   newlyUnlocked,
   onClearNew,
   onStart,
   onBrowse,
+  onAcademy,
 }: {
   xp: number;
   streak: number;
   badges: string[];
   progress: Record<string, ScenarioProgress>;
+  academy: AcademyStats;
   newlyUnlocked: string[];
   onClearNew: () => void;
   onStart: (id: string) => void;
   onBrowse: () => void;
+  onAcademy: () => void;
 }) {
   const level = levelFromXp(xp);
   const next = nextLevel(xp);
@@ -48,6 +54,16 @@ export function DashboardView({
   const completedCount = useMemo(
     () => Object.values(progress).filter((p) => p.completed).length,
     [progress],
+  );
+  const academyAccuracy = overallAccuracy(academy);
+  const academyTracks = useMemo(
+    () =>
+      ACADEMY_TRACKS.map((track) => ({
+        track,
+        meta: TRACK_META[track],
+        progress: trackProgress(academy, track),
+      })),
+    [academy],
   );
   const nextScenario = SCENARIOS.find(
     (s) => !progress[s.id]?.completed && isUnlocked(s, progress),
@@ -87,7 +103,7 @@ export function DashboardView({
             </h1>
             <p className="mt-1 text-xs text-muted-foreground">
               {next
-                ? `${next.minXp - xp} XP to Level ${next.level} — ${next.title}`
+                ? `${next.minXp - xp} XP to Level ${next.level} — ${next.title} (${pct}% of the way)`
                 : "Top of the ladder — the ramp salutes you."}
             </p>
           </div>
@@ -96,8 +112,18 @@ export function DashboardView({
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Total XP</p>
           </div>
         </div>
-        <Progress value={pct} className="mt-4 h-2" />
-        <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
+        <div className="mt-4 flex items-center gap-1" aria-hidden>
+          {LEVELS.map((l, i) => (
+            <span
+              key={l.level}
+              className={cn(
+                "h-1.5 flex-1 rounded-full transition",
+                i < lvlIdx ? "bg-emerald-500/70" : i === lvlIdx ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-muted",
+              )}
+            />
+          ))}
+        </div>
+        <div className="mt-1.5 flex justify-between font-mono text-[10px] text-muted-foreground">
           {LEVELS.map((l, i) => (
             <span key={l.level} className={cn(i === lvlIdx && "font-bold text-emerald-500")}>
               L{i + 1}
@@ -107,17 +133,55 @@ export function DashboardView({
       </div>
 
       {/* stat cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <StatCard icon={<Star className="h-4 w-4 text-amber-500" />} label="Streak" value={`${streak} clean`} />
         <StatCard icon={<Target className="h-4 w-4 text-emerald-500" />} label="Completed" value={`${completedCount}/${SCENARIOS.length}`} />
         <StatCard icon={<Award className="h-4 w-4 text-violet-500" />} label="Badges" value={`${badges.length}/${BADGES.length}`} />
+        <StatCard icon={<Brain className="h-4 w-4 text-teal-500" />} label="Drills" value={`${academy.answered.length}/${ACADEMY_QUESTIONS.length}`} />
         <StatCard icon={<Flame className="h-4 w-4 text-red-500" />} label="Career" value={`${Math.round(Object.values(progress).reduce((a, p) => a + p.totalXp, 0))} XP earned`} />
+      </div>
+
+      {/* knowledge gym */}
+      <div className="rounded-xl border bg-card/60 p-4">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <h2 className="flex items-center gap-2 text-sm font-semibold">
+              <Brain className="h-4 w-4 text-emerald-500" /> Knowledge Gym
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {academy.answered.length === 0
+                ? "Start with a 10-question drill — every answer teaches the DGR, IGOM, IATA or SAPS rule behind it."
+                : `${academy.correct.length} correct from ${academy.answered.length} attempted · ${academyAccuracy}% accuracy · best combo ${academy.bestCombo}.`}
+            </p>
+          </div>
+          <Button size="sm" className="h-8 gap-1.5 text-xs" onClick={onAcademy}>
+            <Play className="h-3.5 w-3.5" /> Enter the gym
+          </Button>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {academyTracks.map(({ track, meta, progress: trackStat }) => (
+            <div key={track} className="rounded-lg border bg-background/50 px-3 py-2">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] font-semibold">
+                  <span aria-hidden>{meta.icon}</span> {meta.short}
+                </span>
+                <span className="font-mono text-[10px] text-muted-foreground">
+                  {trackStat.correct}/{trackStat.total}
+                </span>
+              </div>
+              <Progress value={trackStat.mastery} className="mt-1.5 h-1" />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* badges shelf */}
       <div>
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Badge Cabinet
+          <span className="font-mono text-[10px] font-normal normal-case tracking-normal">
+            {badges.length}/{BADGES.length} earned
+          </span>
         </h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {BADGES.map((b) => {
@@ -216,10 +280,23 @@ export function DashboardView({
       </div>
 
       {nextScenario && (
-        <Button size="lg" className="mx-auto gap-2" onClick={() => onStart(nextScenario.id)}>
-          <Play className="h-4 w-4" />
-          Continue training — {nextScenario.code}: {nextScenario.title}
-        </Button>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-500/40 bg-gradient-to-r from-emerald-500/10 via-card to-card p-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+              Continue training
+            </p>
+            <p className="mt-0.5 truncate text-sm font-semibold">
+              {nextScenario.code} — {nextScenario.title}
+            </p>
+            <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+              {nextScenario.minutes} MIN · {nextScenario.xpBase} XP BASE ·{" "}
+              {"★".repeat(nextScenario.difficulty)} DIFFICULTY
+            </p>
+          </div>
+          <Button size="lg" className="shrink-0 gap-2" onClick={() => onStart(nextScenario.id)}>
+            <Play className="h-4 w-4" /> Start module
+          </Button>
+        </div>
       )}
     </div>
   );

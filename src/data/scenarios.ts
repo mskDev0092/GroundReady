@@ -15,6 +15,8 @@ import { scenarioPRM } from "./scenarios-module13";
 import { scenarioMEDA } from "./scenarios-module14";
 import { scenarioFog } from "./scenarios-module15";
 import { scenarioDocFraud } from "./scenarios-module16";
+import { scenarioCargoDgr } from "./scenarios-module17";
+import { scenarioIgomTurnaround } from "./scenarios-module18";
 
 export const SCENARIOS: Scenario[] = [
   scenarioZamzam,
@@ -33,16 +35,20 @@ export const SCENARIOS: Scenario[] = [
   scenarioMEDA,
   scenarioFog,
   scenarioDocFraud,
+  scenarioCargoDgr,
+  scenarioIgomTurnaround,
 ];
 
 export const CATEGORY_ORDER: ScenarioCategory[] = [
   "baggage-dgr",
+  "cargo-dgr",
   "documentation",
   "overbooking",
   "gate-ops",
   "special-pax",
   "irrops",
   "security",
+  "ramp-ops",
 ];
 
 export function getScenario(id: string): Scenario | undefined {

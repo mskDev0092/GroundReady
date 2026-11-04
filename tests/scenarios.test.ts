@@ -23,10 +23,10 @@ function checkNoIssues(issues: string[]) {
 }
 
 describe("Scenario catalogue", () => {
-  test("contains all 16 modules in order", () => {
-    expect(SCENARIOS).toHaveLength(16);
+  test("contains all 18 modules in order", () => {
+    expect(SCENARIOS).toHaveLength(18);
     expect(SCENARIOS.map((scenario) => scenario.moduleNo)).toEqual(
-      Array.from({ length: 16 }, (_, index) => index + 1),
+      Array.from({ length: 18 }, (_, index) => index + 1),
     );
   });
 

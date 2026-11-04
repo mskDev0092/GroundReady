@@ -7,12 +7,14 @@
 
 export type ScenarioCategory =
   | "baggage-dgr"
+  | "cargo-dgr"
   | "documentation"
   | "overbooking"
   | "gate-ops"
   | "special-pax"
   | "irrops"
-  | "security";
+  | "security"
+  | "ramp-ops";
 
 export const CATEGORY_META: Record<
   ScenarioCategory,
@@ -23,6 +25,12 @@ export const CATEGORY_META: Record<
     short: "BAG",
     description:
       "Liquids, dangerous goods, excess baggage and IATA DGR 2026 handling.",
+  },
+  "cargo-dgr": {
+    label: "Cargo & DGR Acceptance",
+    short: "CGO",
+    description:
+      "Shipper declarations, acceptance checklists, UN numbers, packing instructions and NOTOC.",
   },
   documentation: {
     label: "Documentation & Visas",
@@ -59,6 +67,12 @@ export const CATEGORY_META: Record<
     short: "SEC",
     description:
       "Document fraud detection, quiet escalation and ASF coordination.",
+  },
+  "ramp-ops": {
+    label: "Ramp & IGOM",
+    short: "RMP",
+    description:
+      "IATA IGOM turnaround, engine danger zones, FOD, GSE, loading and departure.",
   },
 };
 
@@ -205,7 +219,7 @@ export type ScenarioStep = DialogueStep | TerminalStep | DecisionStep;
 /* ---------------------------------- Scenario ---------------------------------- */
 
 export interface RuleReference {
-  source: string; // e.g. "IATA DGR 65th Ed. (2026)"
+  source: string; // e.g. "IATA DGR 67th Ed. (2026)"
   ref: string; // e.g. "PI 954 — Dry ice, ventilated packaging"
   detail: string;
 }
@@ -282,9 +296,42 @@ export interface ScenarioProgress {
   lastPlayed: string; // ISO date
 }
 
+/* ----------------------------------- Academy ---------------------------------- */
+
+export type AcademyTrack = "DGR" | "IGOM" | "IATA" | "SAPS";
+
+export interface AcademyQuestion {
+  id: string;
+  track: AcademyTrack;
+  topic: string;
+  /** 1 = foundation, 2 = operational, 3 = expert */
+  difficulty: 1 | 2 | 3;
+  question: string;
+  /** Exactly four answer choices. */
+  options: string[];
+  /** Index into options for the correct answer. */
+  answer: number;
+  explanation: string;
+  reference: string;
+  /** Optional scenario that practises the same competency. */
+  scenarioId?: string;
+}
+
+export interface AcademyStats {
+  /** Unique question ids the trainee has attempted. */
+  answered: string[];
+  /** Unique question ids the trainee has answered correctly at least once. */
+  correct: string[];
+  /** XP earned inside the Knowledge Gym (also mirrored into total XP). */
+  xp: number;
+  bestCombo: number;
+  drills: number;
+  lastPlayed: string | null;
+}
+
 /* ---------------------------------- Session ---------------------------------- */
 
-export type ViewName = "dashboard" | "scenarios" | "sim" | "summary";
+export type ViewName = "dashboard" | "scenarios" | "academy" | "sim" | "summary";
 
 export interface ChatMessage {
   id: string;

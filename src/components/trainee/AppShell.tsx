@@ -30,11 +30,14 @@ import { DashboardView } from "./DashboardView";
 import { ScenariosView } from "./ScenariosView";
 import { SimView } from "./SimView";
 import { SummaryView } from "./SummaryView";
+import { AcademyView } from "./AcademyView";
 import { getScenario, SCENARIOS } from "@/data/scenarios";
 import { levelFromXp } from "@/data/gamification";
 import { sfx } from "@/lib/sound";
+import { cn } from "@/lib/utils";
 import type { ViewName } from "@/lib/types";
 import {
+  BookOpenCheck,
   Gauge,
   Home,
   LayoutGrid,
@@ -43,9 +46,16 @@ import {
   Sun,
   Volume2,
   VolumeX,
+  Zap,
 } from "lucide-react";
 
 const subscribeNoop = () => () => {};
+
+const MOBILE_TABS = [
+  { view: "dashboard", label: "Dashboard", icon: Home },
+  { view: "scenarios", label: "Scenarios", icon: LayoutGrid },
+  { view: "academy", label: "Gym", icon: BookOpenCheck },
+] as const;
 
 export function AppShell() {
   const mounted = useSyncExternalStore(
@@ -64,6 +74,7 @@ export function AppShell() {
     streak,
     badges,
     progress,
+    academy,
     soundEnabled,
     traineeName,
     lastResult,
@@ -163,6 +174,14 @@ export function AppShell() {
             >
               <LayoutGrid className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Scenarios</span>
             </Button>
+            <Button
+              variant={view === "academy" ? "secondary" : "ghost"}
+              size="sm"
+              className="h-8 gap-1.5 text-xs"
+              onClick={() => go("academy")}
+            >
+              <BookOpenCheck className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Gym</span>
+            </Button>
             <span className="mx-1 hidden h-5 w-px bg-border md:block" />
             <Badge
               variant="outline"
@@ -173,6 +192,12 @@ export function AppShell() {
           </nav>
 
           <div className="flex items-center gap-1">
+            <Badge
+              variant="outline"
+              className="gap-1 border-emerald-500/40 bg-emerald-500/10 font-mono text-[10px] text-emerald-600 sm:hidden dark:text-emerald-400"
+            >
+              <Zap className="h-3 w-3" /> {xp}
+            </Badge>
             <Button
               size="icon"
               variant="ghost"
@@ -245,7 +270,7 @@ export function AppShell() {
       </header>
 
       {/* main */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-3 py-4">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-3 pb-24 pt-4 sm:pb-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={view + (scenarioId ?? "") + simKey}
@@ -260,14 +285,19 @@ export function AppShell() {
                 streak={streak}
                 badges={badges}
                 progress={progress}
+                academy={academy}
                 newlyUnlocked={newlyUnlocked}
                 onClearNew={clearNewlyUnlocked}
                 onStart={startScenario}
                 onBrowse={() => go("scenarios")}
+                onAcademy={() => go("academy")}
               />
             )}
             {view === "scenarios" && (
               <ScenariosView progress={progress} onStart={startScenario} />
+            )}
+            {view === "academy" && (
+              <AcademyView onStartScenario={startScenario} />
             )}
             {view === "sim" && scenario && (
               <SimView
@@ -286,21 +316,52 @@ export function AppShell() {
                 onRetry={() => startScenario(lastResult.scenarioId)}
                 onNext={() => nextScenarioAfter && startScenario(nextScenarioAfter.id)}
                 onDashboard={() => go("dashboard")}
+                onAcademy={() => go("academy")}
               />
             )}
           </motion.div>
         </AnimatePresence>
       </main>
 
+      {/* mobile bottom nav */}
+      <nav
+        aria-label="Primary"
+        className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-background/75 sm:hidden print:hidden"
+      >
+        <div className="mx-auto grid w-full max-w-md grid-cols-3">
+          {MOBILE_TABS.map(({ view: tabView, label, icon: Icon }) => {
+            const active = view === tabView;
+            return (
+              <button
+                key={tabView}
+                type="button"
+                onClick={() => go(tabView)}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "relative flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition",
+                  active ? "text-emerald-500" : "text-muted-foreground",
+                )}
+              >
+                {active && (
+                  <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-emerald-500" />
+                )}
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
       {/* sticky footer */}
-      <footer className="mt-auto border-t bg-card/50 print:hidden">
+      <footer className="mt-auto hidden border-t bg-card/50 sm:block print:hidden">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-3 py-3 text-[10px] text-muted-foreground">
           <p>
             <span className="font-semibold text-foreground">AltéaMaster</span> — gamified DCS &
             ground-handling training for SAPS Traffic Assistants
           </p>
           <p className="font-mono">
-            IATA DGR 65th Ed. (2026) · GACA · TIMATIC · TRAINING ONLY — NOT FOR OPERATIONAL USE
+            IATA DGR 67th Ed. (2026) · IGOM · TIMATIC · PCAA · TRAINING ONLY — NOT FOR OPERATIONAL USE
           </p>
         </div>
       </footer>

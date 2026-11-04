@@ -1,15 +1,17 @@
 import type { BadgeDef, LevelDef } from "@/lib/types";
 
-/** Level ladder — Level 1 Trainee T/A → Level 5 Senior Duty Supervisor */
+/** Level ladder — Level 1 Trainee T/A → Level 7 Station Manager */
 export const LEVELS: LevelDef[] = [
   { level: 1, title: "Trainee T/A", minXp: 0 },
   { level: 2, title: "Junior T/A", minXp: 250 },
   { level: 3, title: "Traffic Assistant", minXp: 700 },
   { level: 4, title: "Senior T/A", minXp: 1250 },
   { level: 5, title: "Senior Duty Supervisor", minXp: 2000 },
+  { level: 6, title: "Duty Manager", minXp: 3000 },
+  { level: 7, title: "Station Manager", minXp: 3600 },
 ];
 
-export const MAX_XP = 2800;
+export const MAX_XP = 4200;
 
 export function levelFromXp(xp: number): LevelDef {
   let current = LEVELS[0];
@@ -151,6 +153,70 @@ export const BADGES: BadgeDef[] = [
     description:
       "Detected a forged visa and escalated with ASF discipline — zero public drama.",
     requirement: "Score 90%+ on Module 16 — The Quiet Red Flag",
+  },
+  {
+    id: "dgr-acceptor",
+    name: "DGR Acceptance Officer",
+    icon: "🛃",
+    description:
+      "Caught a defective Shipper's Declaration, quarantined a leaking Class 3 drum and released only sound cargo with a NOTOC.",
+    requirement: "Score 90%+ on Module 17 — The Blue Barrel",
+  },
+  {
+    id: "igom-turnaround",
+    name: "Turnaround Marshal",
+    icon: "🦺",
+    description:
+      "Ran a 35-minute turnaround: cleared an engine-zone incursion, removed FOD, reconciled a late bag and protected the departure walk-around.",
+    requirement: "Score 90%+ on Module 18 — Thirty-Five Minutes",
+  },
+  {
+    id: "dgr-scholar",
+    name: "DGR Scholar",
+    icon: "☣️",
+    description:
+      "Mastered twelve dangerous-goods drill questions across classification, acceptance and loading.",
+    requirement: "Answer 12 DGR questions correctly in the Knowledge Gym",
+  },
+  {
+    id: "igom-ramp-pro",
+    name: "IGOM Ramp Pro",
+    icon: "🦺",
+    description:
+      "Proved safety-critical ramp knowledge: engine zones, FOD, GSE, loading and departure.",
+    requirement: "Answer 12 IGOM questions correctly in the Knowledge Gym",
+  },
+  {
+    id: "iata-ace",
+    name: "IATA Ace",
+    icon: "🛫",
+    description:
+      "Handled passenger standards, TIMATIC, SSR codes, special passengers and IRROPS under drill conditions.",
+    requirement: "Answer 12 IATA questions correctly in the Knowledge Gym",
+  },
+  {
+    id: "saps-professional",
+    name: "SAPS Professional",
+    icon: "🇵🇰",
+    description:
+      "Demonstrated local airport authority, service excellence, integrity and escalation discipline.",
+    requirement: "Answer 12 SAPS/PCAA questions correctly in the Knowledge Gym",
+  },
+  {
+    id: "academy-graduate",
+    name: "Academy Graduate",
+    icon: "🎓",
+    description:
+      "Completed the full Knowledge Gym curriculum across DGR, IGOM, IATA and SAPS.",
+    requirement: "Answer 12 questions correctly in every Knowledge Gym track",
+  },
+  {
+    id: "perfect-ten",
+    name: "Perfect Ten",
+    icon: "🔥",
+    description:
+      "Answered ten Knowledge Gym questions in a row without a mistake.",
+    requirement: "Build a 10-answer correct streak in the Knowledge Gym",
   },
 ];
 

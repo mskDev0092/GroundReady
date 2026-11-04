@@ -38,7 +38,11 @@ describe("Level ladder", () => {
       [1250, 4],
       [1999, 4],
       [2000, 5],
-      [MAX_XP, 5],
+      [2999, 5],
+      [3000, 6],
+      [3599, 6],
+      [3600, 7],
+      [MAX_XP, 7],
     ];
 
     for (const [xp, level] of expectations) {
@@ -56,7 +60,9 @@ describe("Level ladder", () => {
     expect(nextLevel(249)?.level).toBe(2);
     expect(nextLevel(250)?.level).toBe(3);
     expect(nextLevel(1249)?.level).toBe(4);
-    expect(nextLevel(2000)).toBeNull();
+    expect(nextLevel(2000)?.level).toBe(6);
+    expect(nextLevel(3000)?.level).toBe(7);
+    expect(nextLevel(3600)).toBeNull();
     expect(nextLevel(MAX_XP + 1)).toBeNull();
   });
 });

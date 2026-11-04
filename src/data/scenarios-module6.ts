@@ -314,7 +314,7 @@ export const scenarioLithium: Scenario = {
   ],
   debriefRules: [
     {
-      source: "IATA DGR 66th Ed. (2026) — Lithium Batteries",
+      source: "IATA DGR 67th Ed. (2026) — Lithium Batteries",
       ref: "≤100Wh cabin OK · 100–160Wh airline approval · >160Wh FORBIDDEN",
       detail:
         "Power banks and spare lithium-ion cells are carry-on ONLY. Spare cells need terminal protection (tape/battery case). Power stations above 160Wh cannot fly on passenger aircraft at all.",

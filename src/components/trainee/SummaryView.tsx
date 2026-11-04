@@ -10,6 +10,7 @@ import { badgeById } from "@/data/gamification";
 import {
   ArrowRight,
   BookOpenText,
+  Brain,
   CheckCircle2,
   Home,
   RotateCcw,
@@ -71,6 +72,7 @@ export function SummaryView({
   onRetry,
   onNext,
   onDashboard,
+  onAcademy,
 }: {
   result: ScenarioResult;
   scenario: Scenario;
@@ -78,6 +80,7 @@ export function SummaryView({
   onRetry: () => void;
   onNext: () => void;
   onDashboard: () => void;
+  onAcademy: () => void;
 }) {
   const badge = result.badgeUnlocked ? badgeById(result.badgeUnlocked) : undefined;
   const grade =
@@ -186,7 +189,7 @@ export function SummaryView({
       {/* rule references */}
       <div className="rounded-xl border bg-card/70 p-4">
         <h2 className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
-          <BookOpenText className="h-4 w-4 text-emerald-500" /> IATA / GACA / SAPS references
+          <BookOpenText className="h-4 w-4 text-emerald-500" /> IATA / PCAA / SAPS references
         </h2>
         <div className="space-y-2">
           {scenario.debriefRules.map((r, i) => (
@@ -204,9 +207,14 @@ export function SummaryView({
       </div>
 
       <div className="flex flex-wrap justify-between gap-2">
-        <Button variant="outline" className="gap-1.5" onClick={onRetry}>
-          <RotateCcw className="h-4 w-4" /> Retry scenario
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="gap-1.5" onClick={onRetry}>
+            <RotateCcw className="h-4 w-4" /> Retry scenario
+          </Button>
+          <Button variant="outline" className="gap-1.5" onClick={onAcademy}>
+            <Brain className="h-4 w-4" /> Knowledge Gym
+          </Button>
+        </div>
         <div className="flex gap-2">
           <Button variant="outline" className="gap-1.5" onClick={onDashboard}>
             <Home className="h-4 w-4" /> Dashboard
