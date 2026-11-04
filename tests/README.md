@@ -1,6 +1,6 @@
 # Test suite
 
-Automated checks for the AltéaMaster scenario engine, gamified Knowledge Gym,
+Automated checks for the GroundReady scenario engine, gamified Knowledge Gym,
 content and progression.
 
 ## Run
@@ -22,7 +22,8 @@ bun run validate         # legacy catalogue validator
 | `altea.test.ts` | Command normalisation/matching, sequence detection, suggestions, attempts/hint penalties, autocomplete. |
 | `store.test.ts` | Persisted Zustand progress: best score/time, attempts, XP cap, badge duplication, reset. |
 | `gamification.test.ts` | Level boundaries, XP cap and badge registry integrity. |
-| `academy.test.ts` | Knowledge Gym question-bank integrity, deterministic drills, daily seed, track mastery, academy badges and store XP/combo behaviour. |
+| `academy.test.ts` | Knowledge Gym question-bank integrity, deterministic drills, daily seed, track mastery, academy badges, smart-review queue and store XP/combo behaviour. |
+| `glossary.test.ts` | Jargon-buster integrity: unique terms, plain-language meanings, category coverage, search and deterministic term of the day. |
 | `helpers/` | Shared perfect-run simulator, in-memory `localStorage` and step scoring helpers. |
 
 ## Guarantees
@@ -32,5 +33,21 @@ bun run validate         # legacy catalogue validator
   badge.
 - Every Knowledge Gym question has four options, one valid answer, a full
   explanation, a source reference and an optional link to a real scenario.
+- Every glossary term has a plain-language meaning, a shift example, a valid
+  category and optional scenario link; search is deterministic.
 - The 18-scenario campaign now spans **24 badges** and seven levels, from
   Trainee T/A to Station Manager.
+
+## Beginner aids
+
+- **Guided Coach Mode** (on by default) highlights the strongest dialogue and
+  decision option, and can type a pending Altéa command for the trainee at a
+  point penalty.
+- **Jargon Buster** explains 40+ aviation terms in plain English, with
+  read-aloud support and links into practice scenarios.
+- **Read aloud** uses the browser speech API for gym questions, explanations,
+  briefing text and glossary terms.
+- **Smart Review** queues every missed gym question until it is answered
+  correctly, so weak spots resurface automatically.
+- **First-run tour** walks a complete beginner through the three ways to learn
+  and drops them into a guided shift, a 10-question drill or the glossary.

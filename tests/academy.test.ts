@@ -12,6 +12,7 @@ import {
   overallAccuracy,
   pickDrill,
   questionXp,
+  reviewQuestions,
   seededShuffle,
   trackProgress,
   trackQuestionCount,
@@ -173,6 +174,21 @@ describe("Knowledge Gym drill builder", () => {
     }
     expect(findQuestion("not-a-question")).toBeUndefined();
   });
+
+  test("reviewQuestions resolves queued ids in order and drops stale ids", () => {
+    const [first, second, third] = ACADEMY_QUESTIONS;
+    const stats = {
+      ...emptyAcademyStats(),
+      review: [third.id, "stale-question", first.id],
+    };
+
+    expect(reviewQuestions(stats).map((question) => question.id)).toEqual([
+      third.id,
+      first.id,
+    ]);
+    expect(reviewQuestions(emptyAcademyStats())).toEqual([]);
+    expect(reviewQuestions({ ...emptyAcademyStats(), review: [second.id] })).toHaveLength(1);
+  });
 });
 
 describe("Knowledge Gym progress and badges", () => {
@@ -328,5 +344,37 @@ describe("Knowledge Gym store integration", () => {
       combo: 0,
     });
     expect(useUserStore.getState().xp).toBe(0);
+  });
+
+  test("smart review queues a miss and clears it once answered correctly", () => {
+    const [first, second] = ACADEMY_QUESTIONS;
+
+    useUserStore.getState().recordAcademyAnswer(first.id, false);
+    useUserStore.getState().recordAcademyAnswer(second.id, false);
+    expect(useUserStore.getState().academy.review).toEqual([first.id, second.id]);
+
+    useUserStore.getState().recordAcademyAnswer(second.id, false);
+    expect(useUserStore.getState().academy.review).toEqual([first.id, second.id]);
+
+    useUserStore.getState().recordAcademyAnswer(first.id, true);
+    expect(useUserStore.getState().academy.review).toEqual([second.id]);
+  });
+
+  test("coach mode and onboarding flags toggle, persist and reset", () => {
+    expect(useUserStore.getState().coachMode).toBe(true);
+    expect(useUserStore.getState().onboarded).toBe(false);
+
+    useUserStore.getState().toggleCoachMode();
+    expect(useUserStore.getState().coachMode).toBe(false);
+
+    useUserStore.getState().completeOnboarding();
+    expect(useUserStore.getState().onboarded).toBe(true);
+
+    useUserStore.getState().replayOnboarding();
+    expect(useUserStore.getState().onboarded).toBe(false);
+
+    useUserStore.getState().resetAll();
+    expect(useUserStore.getState().coachMode).toBe(true);
+    expect(useUserStore.getState().onboarded).toBe(false);
   });
 });

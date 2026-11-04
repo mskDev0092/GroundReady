@@ -4,7 +4,7 @@ import { installLocalStorage } from "./helpers/local-storage";
 
 const { memory } = installLocalStorage();
 
-const { useUserStore } = await import("@/store/useUserStore");
+const { useUserStore, STORAGE_KEY, LEGACY_STORAGE_KEY } = await import("@/store/useUserStore");
 const { MAX_XP } = await import("@/data/gamification");
 
 const SCENARIO_ID = "m1-zamzam";
@@ -126,7 +126,7 @@ describe("User progress store", () => {
 
   test("only persisted fields are written to storage", () => {
     useUserStore.getState().completeScenario(result());
-    const raw = memory.get("alteamaster-progress-v1");
+    const raw = memory.get(STORAGE_KEY);
 
     expect(raw).toBeDefined();
     const persisted = JSON.parse(raw as string);
@@ -134,6 +134,39 @@ describe("User progress store", () => {
     expect(persisted.state.progress[SCENARIO_ID]).toBeDefined();
     expect(persisted.state.lastResult).toBeUndefined();
     expect(persisted.state.newlyUnlocked).toBeUndefined();
+  });
+
+  test("legacy AltéaMaster progress migrates to the GroundReady key", async () => {
+    const legacy = JSON.stringify({
+      state: {
+        xp: 321,
+        streak: 4,
+        badges: [BADGE_ID],
+        progress: {},
+        academy: {
+          answered: [],
+          correct: [],
+          review: [],
+          xp: 0,
+          bestCombo: 0,
+          drills: 0,
+          lastPlayed: null,
+        },
+        soundEnabled: true,
+        coachMode: true,
+        onboarded: true,
+        traineeName: "Legacy T/A",
+      },
+      version: 0,
+    });
+
+    memory.set(LEGACY_STORAGE_KEY, legacy);
+    await useUserStore.persist.rehydrate();
+
+    expect(memory.get(STORAGE_KEY)).toBe(legacy);
+    expect(useUserStore.getState().xp).toBe(321);
+    expect(useUserStore.getState().traineeName).toBe("Legacy T/A");
+    expect(useUserStore.getState().onboarded).toBe(true);
   });
 
   test("resetAll clears XP, badges, progress and transient state", () => {

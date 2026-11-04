@@ -11,7 +11,35 @@ import {
   questionXp,
 } from "@/data/academy";
 
-const STORAGE_KEY = "alteamaster-progress-v1";
+export const STORAGE_KEY = "groundready-progress-v1";
+export const LEGACY_STORAGE_KEY = "alteamaster-progress-v1";
+
+/**
+ * Reuse progress saved under the old AltéaMaster key. A rebrand must never
+ * wipe a trainee's XP, badges, scenario results or smart-review queue.
+ */
+const progressStorage = () => ({
+  getItem: (name: string): string | null => {
+    if (typeof localStorage === "undefined") return null;
+    const current = localStorage.getItem(name);
+    if (current !== null || name !== STORAGE_KEY) return current;
+
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy === null) return null;
+
+    localStorage.setItem(STORAGE_KEY, legacy);
+    return legacy;
+  },
+  setItem: (name: string, value: string) => {
+    if (typeof localStorage === "undefined") return;
+    localStorage.setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    if (typeof localStorage === "undefined") return;
+    localStorage.removeItem(name);
+    if (name === STORAGE_KEY) localStorage.removeItem(LEGACY_STORAGE_KEY);
+  },
+});
 
 export interface UserStoreState {
   /* ---- persisted ---- */
@@ -21,6 +49,8 @@ export interface UserStoreState {
   progress: Record<string, ScenarioProgress>;
   academy: AcademyStats;
   soundEnabled: boolean;
+  coachMode: boolean;
+  onboarded: boolean;
   traineeName: string;
 
   /* ---- transient (not persisted) ---- */
@@ -47,6 +77,9 @@ export interface UserStoreState {
   setLastResult: (r: ScenarioResult | null) => void;
   clearNewlyUnlocked: () => void;
   toggleSound: () => void;
+  toggleCoachMode: () => void;
+  completeOnboarding: () => void;
+  replayOnboarding: () => void;
   setTraineeName: (n: string) => void;
   resetAll: () => void;
 }
@@ -58,6 +91,8 @@ const initialPersisted = {
   progress: {} as Record<string, ScenarioProgress>,
   academy: emptyAcademyStats(),
   soundEnabled: true,
+  coachMode: true,
+  onboarded: false,
   traineeName: "Trainee T/A",
 };
 
@@ -134,6 +169,14 @@ export const useUserStore = create<UserStoreState>()(
               : questionXp(question)
             : 0;
 
+        /* Smart review: a miss is queued; a correct answer clears it. */
+        const review = state.academy.review ?? [];
+        const nextReview = correct
+          ? review.filter((id) => id !== questionId)
+          : review.includes(questionId)
+            ? review
+            : [...review, questionId];
+
         const academy: AcademyStats = {
           answered: alreadyAnswered
             ? state.academy.answered
@@ -142,6 +185,7 @@ export const useUserStore = create<UserStoreState>()(
             correct && !alreadyCorrect
               ? [...state.academy.correct, questionId]
               : state.academy.correct,
+          review: nextReview,
           xp: state.academy.xp + xpAwarded,
           bestCombo: Math.max(state.academy.bestCombo, combo),
           drills: state.academy.drills,
@@ -180,6 +224,9 @@ export const useUserStore = create<UserStoreState>()(
       setLastResult: (r) => set({ lastResult: r }),
       clearNewlyUnlocked: () => set({ newlyUnlocked: [] }),
       toggleSound: () => set({ soundEnabled: !get().soundEnabled }),
+      toggleCoachMode: () => set({ coachMode: !get().coachMode }),
+      completeOnboarding: () => set({ onboarded: true }),
+      replayOnboarding: () => set({ onboarded: false }),
       setTraineeName: (n) => set({ traineeName: n.slice(0, 24) || "Trainee T/A" }),
 
       resetAll: () =>
@@ -193,7 +240,7 @@ export const useUserStore = create<UserStoreState>()(
     }),
     {
       name: STORAGE_KEY,
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(progressStorage),
       partialize: (state) => ({
         xp: state.xp,
         streak: state.streak,
@@ -201,8 +248,18 @@ export const useUserStore = create<UserStoreState>()(
         progress: state.progress,
         academy: state.academy,
         soundEnabled: state.soundEnabled,
+        coachMode: state.coachMode,
+        onboarded: state.onboarded,
         traineeName: state.traineeName,
       }),
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<UserStoreState>;
+        return {
+          ...current,
+          ...saved,
+          academy: { ...emptyAcademyStats(), ...(saved.academy ?? {}) },
+        };
+      },
     },
   ),
 );

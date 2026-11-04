@@ -31,6 +31,9 @@ import { ScenariosView } from "./ScenariosView";
 import { SimView } from "./SimView";
 import { SummaryView } from "./SummaryView";
 import { AcademyView } from "./AcademyView";
+import { GlossaryView } from "./GlossaryView";
+import { OnboardingDialog } from "./OnboardingDialog";
+import { BrandMark } from "./BrandMark";
 import { getScenario, SCENARIOS } from "@/data/scenarios";
 import { levelFromXp } from "@/data/gamification";
 import { sfx } from "@/lib/sound";
@@ -38,14 +41,17 @@ import { cn } from "@/lib/utils";
 import type { ViewName } from "@/lib/types";
 import {
   BookOpenCheck,
+  BookOpenText,
   Gauge,
   Home,
   LayoutGrid,
   Moon,
   Settings2,
+  Sparkles,
   Sun,
   Volume2,
   VolumeX,
+  Wand2,
   Zap,
 } from "lucide-react";
 
@@ -55,6 +61,7 @@ const MOBILE_TABS = [
   { view: "dashboard", label: "Dashboard", icon: Home },
   { view: "scenarios", label: "Scenarios", icon: LayoutGrid },
   { view: "academy", label: "Gym", icon: BookOpenCheck },
+  { view: "glossary", label: "Words", icon: BookOpenText },
 ] as const;
 
 export function AppShell() {
@@ -66,6 +73,7 @@ export function AppShell() {
   const [view, setView] = useState<ViewName>("dashboard");
   const [scenarioId, setScenarioId] = useState<string | null>(null);
   const [simKey, setSimKey] = useState(0);
+  const [tourRequested, setTourRequested] = useState(false);
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
@@ -76,6 +84,8 @@ export function AppShell() {
     progress,
     academy,
     soundEnabled,
+    coachMode,
+    onboarded,
     traineeName,
     lastResult,
     newlyUnlocked,
@@ -83,12 +93,18 @@ export function AppShell() {
     setLastResult,
     clearNewlyUnlocked,
     toggleSound,
+    toggleCoachMode,
+    completeOnboarding,
+    replayOnboarding,
     resetAll,
   } = useUserStore();
 
   useEffect(() => {
     if (view !== "dashboard") clearNewlyUnlocked();
   }, [view, clearNewlyUnlocked]);
+
+  /* First run: open the tour automatically once the client has hydrated. */
+  const tourOpen = tourRequested || (mounted && !onboarded && xp === 0);
 
   const level = levelFromXp(xp);
 
@@ -121,10 +137,8 @@ export function AppShell() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-600 font-bold text-emerald-50">
-            ✈
-          </div>
-          <p className="font-mono text-xs text-muted-foreground">BOOTING ALTÉAMASTER…</p>
+          <BrandMark className="h-12 w-12" />
+          <p className="font-mono text-xs text-muted-foreground">BOOTING GROUNDREADY…</p>
         </div>
       </div>
     );
@@ -142,17 +156,15 @@ export function AppShell() {
           <button
             className="flex items-center gap-2.5"
             onClick={() => go("dashboard")}
-            aria-label="AltéaMaster home"
+            aria-label="GroundReady home"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-600 text-sm font-black text-emerald-50 shadow-[0_0_16px_rgba(16,185,129,0.35)]">
-              ✈
-            </span>
+            <BrandMark className="h-8 w-8 drop-shadow-[0_0_10px_rgba(16,185,129,0.35)]" />
             <span className="hidden flex-col leading-tight sm:flex">
               <span className="text-sm font-bold tracking-tight">
-                Altéa<span className="text-emerald-500">Master</span>
+                Ground<span className="text-emerald-500">Ready</span>
               </span>
               <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-                SAPS Ground Handling Trainer
+                Aviation Ground Operations Trainer
               </span>
             </span>
           </button>
@@ -181,6 +193,14 @@ export function AppShell() {
               onClick={() => go("academy")}
             >
               <BookOpenCheck className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Gym</span>
+            </Button>
+            <Button
+              variant={view === "glossary" ? "secondary" : "ghost"}
+              size="sm"
+              className="h-8 gap-1.5 text-xs"
+              onClick={() => go("glossary")}
+            >
+              <BookOpenText className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Words</span>
             </Button>
             <span className="mx-1 hidden h-5 w-px bg-border md:block" />
             <Badge
@@ -230,6 +250,19 @@ export function AppShell() {
                 <DropdownMenuLabel className="text-xs">
                   Signed in as {traineeName}
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={() => {
+                    replayOnboarding();
+                    setTourRequested(true);
+                  }}
+                >
+                  <Sparkles className="mr-2 h-3.5 w-3.5" /> Replay app tour
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={toggleCoachMode}>
+                  <Wand2 className="mr-2 h-3.5 w-3.5" />
+                  Guided coach: {coachMode ? "On" : "Off"}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -291,13 +324,18 @@ export function AppShell() {
                 onStart={startScenario}
                 onBrowse={() => go("scenarios")}
                 onAcademy={() => go("academy")}
+                onGlossary={() => go("glossary")}
+                onTour={() => setTourRequested(true)}
               />
             )}
             {view === "scenarios" && (
               <ScenariosView progress={progress} onStart={startScenario} />
             )}
             {view === "academy" && (
-              <AcademyView onStartScenario={startScenario} />
+              <AcademyView onStartScenario={startScenario} onGlossary={() => go("glossary")} />
+            )}
+            {view === "glossary" && (
+              <GlossaryView onStartScenario={startScenario} />
             )}
             {view === "sim" && scenario && (
               <SimView
@@ -328,7 +366,7 @@ export function AppShell() {
         aria-label="Primary"
         className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-background/75 sm:hidden print:hidden"
       >
-        <div className="mx-auto grid w-full max-w-md grid-cols-3">
+        <div className="mx-auto grid w-full max-w-md grid-cols-4">
           {MOBILE_TABS.map(({ view: tabView, label, icon: Icon }) => {
             const active = view === tabView;
             return (
@@ -357,14 +395,24 @@ export function AppShell() {
       <footer className="mt-auto hidden border-t bg-card/50 sm:block print:hidden">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-3 py-3 text-[10px] text-muted-foreground">
           <p>
-            <span className="font-semibold text-foreground">AltéaMaster</span> — gamified DCS &
-            ground-handling training for SAPS Traffic Assistants
+            <span className="font-semibold text-foreground">GroundReady</span> — gamified
+            ground-operations training for SAPS Traffic Assistants
           </p>
           <p className="font-mono">
             IATA DGR 67th Ed. (2026) · IGOM · TIMATIC · PCAA · TRAINING ONLY — NOT FOR OPERATIONAL USE
           </p>
         </div>
       </footer>
+
+      <OnboardingDialog
+        open={tourOpen}
+        onComplete={() => {
+          completeOnboarding();
+          setTourRequested(false);
+        }}
+        onNavigate={(next) => go(next)}
+        onStartScenario={startScenario}
+      />
     </div>
   );
 }

@@ -16,7 +16,9 @@ import { PassengerPanel } from "./PassengerPanel";
 import { Terminal, type TermLine } from "./Terminal";
 import { ActionBar } from "./ActionBar";
 import { ChecklistWidget } from "./ChecklistWidget";
+import { SpeakButton } from "./SpeakButton";
 import { sfx } from "@/lib/sound";
+import { useUserStore } from "@/store/useUserStore";
 import {
   commandPoints,
   evaluateEntry,
@@ -34,7 +36,7 @@ import type {
   ScenarioResult,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Clock, Flag, Gauge, Star, X } from "lucide-react";
+import { Clock, Flag, Gauge, Star, Wand2, X } from "lucide-react";
 
 type Phase = "briefing" | "running" | "done";
 
@@ -68,6 +70,8 @@ export function SimView({
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const coachMode = useUserStore((state) => state.coachMode);
+  const toggleCoachMode = useUserStore((state) => state.toggleCoachMode);
 
   const startedAt = useRef<number>(Date.now());
   const msgId = useRef(0);
@@ -279,7 +283,7 @@ export function SimView({
   }, [scenario.steps, step]);
 
   const onTerminalSubmit = useCallback(
-    (raw: string) => {
+    (raw: string, coach = false) => {
       if (!step || step.type !== "terminal") return;
       const upper = raw.toUpperCase().replace(/\s+/g, "");
 
@@ -311,7 +315,8 @@ export function SimView({
 
       if (outcome.kind === "ok") {
         const key = cmdKey(step.id, pendingIdx);
-        const st = cmdStates[key] ?? { attempts: 0, hintUsed: false, done: false };
+        const base = cmdStates[key] ?? { attempts: 0, hintUsed: false, done: false };
+        const st = coach ? { ...base, hintUsed: true } : base;
         const pts = commandPoints(pending, st);
         setCmdStates((prev) => ({ ...prev, [key]: { ...st, done: true } }));
         earnedRef.current += pts;
@@ -320,6 +325,14 @@ export function SimView({
         play(sfx.correct);
         pushLines([
           ...pending.output.map((t) => ({ kind: "output" as const, text: t })),
+          ...(coach
+            ? [
+                {
+                  kind: "sys" as const,
+                  text: "COACH TYPED THE ENTRY — POINTS REDUCED. THE LEARNING IS THE POINT.",
+                },
+              ]
+            : []),
           { kind: "ok", text: pts === pending.points ? `ACCEPTED (+${pts} PTS)` : `ACCEPTED WITH PENALTY (+${pts}/${pending.points} PTS)` },
         ]);
         const nextIdx = pendingIdx + 1;
@@ -367,6 +380,17 @@ export function SimView({
     [step, pendingIdx, extraPatterns, cmdStates, play, pushLines, later_, advance, recordMistake],
   );
 
+  /** Guided coach: type the pending command for the trainee, at a point penalty. */
+  const onCoachFill = useCallback(() => {
+    if (!step || step.type !== "terminal" || busy || phase !== "running") return;
+    const command = step.commands[pendingIdx];
+    if (!command) return;
+    hintsRef.current += 1;
+    setHintsUsed(hintsRef.current);
+    play(sfx.keypress);
+    onTerminalSubmit(command.display, true);
+  }, [step, pendingIdx, busy, phase, play, onTerminalSubmit]);
+
   /* ------------------------------- derived ------------------------------- */
 
   const progressPct = Math.round((stepIdx / scenario.steps.length) * 100);
@@ -389,9 +413,22 @@ export function SimView({
           <Badge variant="outline" className="font-mono text-[10px]">{scenario.code}</Badge>
           <p className="truncate text-sm font-semibold">{scenario.title}</p>
         </div>
-        <div className="flex items-center gap-3 font-mono text-[11px] text-muted-foreground">
+        <div className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {mmss}</span>
           <span className="flex items-center gap-1"><Star className="h-3 w-3 text-amber-500" /> {earned}/{total} PTS</span>
+          <Button
+            size="sm"
+            variant="ghost"
+            className={cn(
+              "h-7 gap-1 px-2 text-[11px]",
+              coachMode ? "text-emerald-500 hover:text-emerald-400" : "text-muted-foreground",
+            )}
+            onClick={toggleCoachMode}
+            aria-pressed={coachMode}
+            title="Guided Coach Mode — highlights the best answer and can type commands for you"
+          >
+            <Wand2 className="h-3 w-3" /> Coach {coachMode ? "ON" : "OFF"}
+          </Button>
           <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-[11px] text-muted-foreground" onClick={onQuit}>
             <X className="h-3 w-3" /> Quit
           </Button>
@@ -414,6 +451,7 @@ export function SimView({
               step={dialogueStep}
               onChoose={onChooseDialogue}
               disabled={busy}
+              coachMode={coachMode}
             />
           </div>
         </div>
@@ -445,6 +483,9 @@ export function SimView({
               hintText={pendingShown && pendingCmd ? `TARGET ENTRY: ${pendingCmd.display}` : undefined}
               onHint={step?.type === "terminal" ? onHint : undefined}
               hintDisabled={!pendingCmd || Boolean(cmdStates[revealedKey]?.done)}
+              onCoachFill={step?.type === "terminal" ? onCoachFill : undefined}
+              coachFillDisabled={!pendingCmd || busy || phase !== "running"}
+              coachMode={coachMode}
               progressPct={progressPct}
               stepLabel={`STEP ${Math.min(stepIdx + 1, scenario.steps.length)}/${scenario.steps.length}`}
             >
@@ -471,6 +512,15 @@ export function SimView({
               {scenario.briefing}
             </DialogDescription>
           </DialogHeader>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <SpeakButton
+              text={`${scenario.title}. ${scenario.briefing}. Objectives: ${scenario.objectives.join(". ")}`}
+              label="Read the briefing aloud"
+            />
+            <span className="font-mono text-[10px] text-muted-foreground">
+              LISTEN WHILE YOU READ
+            </span>
+          </div>
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Objectives

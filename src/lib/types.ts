@@ -1,5 +1,5 @@
 /**
- * AltéaMaster — Core type definitions
+ * GroundReady — Core type definitions
  * Scenario engine, Alteá DCS terminal, dialogue branches and scoring.
  */
 
@@ -322,6 +322,8 @@ export interface AcademyStats {
   answered: string[];
   /** Unique question ids the trainee has answered correctly at least once. */
   correct: string[];
+  /** Question ids the trainee got wrong and should revisit (smart review). */
+  review: string[];
   /** XP earned inside the Knowledge Gym (also mirrored into total XP). */
   xp: number;
   bestCombo: number;
@@ -329,9 +331,26 @@ export interface AcademyStats {
   lastPlayed: string | null;
 }
 
+/* ---------------------------------- Glossary --------------------------------- */
+
+export type GlossaryCategory = "DGR" | "IGOM" | "IATA" | "SAPS" | "DCS";
+
+export interface GlossaryTerm {
+  id: string;
+  term: string;
+  expansion: string;
+  category: GlossaryCategory;
+  /** One-sentence plain-language definition for a complete beginner. */
+  plain: string;
+  /** A concrete example of the term in use on shift. */
+  example: string;
+  /** Optional scenario that practises the term. */
+  scenarioId?: string;
+}
+
 /* ---------------------------------- Session ---------------------------------- */
 
-export type ViewName = "dashboard" | "scenarios" | "academy" | "sim" | "summary";
+export type ViewName = "dashboard" | "scenarios" | "academy" | "glossary" | "sim" | "summary";
 
 export interface ChatMessage {
   id: string;

@@ -37,11 +37,13 @@ export function DialogueFeed({
   step,
   onChoose,
   disabled,
+  coachMode = false,
 }: {
   messages: ChatMessage[];
   step: DialogueStep | null;
   onChoose: (o: DialogueOption) => void;
   disabled?: boolean;
+  coachMode?: boolean;
 }) {
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -103,9 +105,19 @@ export function DialogueFeed({
                 key={o.id}
                 disabled={disabled}
                 onClick={() => onChoose(o)}
-                className="w-full rounded-md border bg-background/60 px-3 py-2 text-left text-[13px] leading-snug transition hover:border-emerald-500/60 hover:bg-emerald-500/5 disabled:cursor-not-allowed disabled:opacity-50"
+                className={cn(
+                  "w-full rounded-md border bg-background/60 px-3 py-2 text-left text-[13px] leading-snug transition hover:border-emerald-500/60 hover:bg-emerald-500/5 disabled:cursor-not-allowed disabled:opacity-50",
+                  coachMode && o.best && "border-emerald-500/60 bg-emerald-500/10",
+                )}
               >
-                {o.text}
+                <span className="flex items-start justify-between gap-2">
+                  <span>{o.text}</span>
+                  {coachMode && o.best && (
+                    <span className="mt-0.5 inline-flex shrink-0 items-center gap-0.5 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+                      Coach pick
+                    </span>
+                  )}
+                </span>
               </button>
             ))}
           </div>

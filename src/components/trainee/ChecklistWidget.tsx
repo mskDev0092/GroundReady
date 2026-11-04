@@ -32,7 +32,7 @@ export function ChecklistWidget({ scenario }: { scenario: Scenario }) {
   const copy = async () => {
     const text = scenario.checklist.map((c, i) => `[${checked.has(i) ? "x" : " "}] ${c}`).join("\n");
     try {
-      await navigator.clipboard.writeText(`SAPS ALTÉAMASTER CHECKLIST — ${scenario.code}\n${text}`);
+      await navigator.clipboard.writeText(`SAPS GROUNDREADY CHECKLIST — ${scenario.code}\n${text}`);
       toast({ title: "Checklist copied", description: "Paste it into your shift log." });
     } catch {
       toast({ title: "Copy failed", description: "Clipboard not available in this browser." });
@@ -84,7 +84,7 @@ export function ChecklistWidget({ scenario }: { scenario: Scenario }) {
         {/* print-only export */}
         <div id="checklist-print" className="hidden print:block">
           <h2 className="text-base font-bold">
-            SAPS AltéaMaster Checklist — {scenario.code} ({scenario.title})
+            GroundReady — SAPS Traffic Assistant Checklist — {scenario.code} ({scenario.title})
           </h2>
           <ul className="mt-2 list-none pl-0 text-sm">
             {scenario.checklist.map((c, i) => (

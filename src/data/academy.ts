@@ -1348,11 +1348,20 @@ export function emptyAcademyStats(): AcademyStats {
   return {
     answered: [],
     correct: [],
+    review: [],
     xp: 0,
     bestCombo: 0,
     drills: 0,
     lastPlayed: null,
   };
+}
+
+/** Questions queued for smart review, resolved against the live bank. */
+export function reviewQuestions(stats: AcademyStats): AcademyQuestion[] {
+  const queued = stats.review ?? [];
+  return queued
+    .map((id) => ACADEMY_QUESTIONS.find((question) => question.id === id))
+    .filter((question): question is AcademyQuestion => Boolean(question));
 }
 
 export interface TrackProgress {

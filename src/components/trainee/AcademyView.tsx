@@ -16,10 +16,12 @@ import {
   dailySeed,
   overallAccuracy,
   pickDrill,
+  reviewQuestions,
   trackProgress,
   TRACK_META,
 } from "@/data/academy";
 import type { AcademyQuestion, AcademyTrack } from "@/lib/types";
+import { SpeakButton } from "./SpeakButton";
 import {
   ArrowRight,
   BookOpenCheck,
@@ -52,7 +54,13 @@ interface Drill {
 
 const DIFFICULTY_LABEL = ["", "Foundation", "Operational", "Expert"];
 
-export function AcademyView({ onStartScenario }: { onStartScenario: (id: string) => void }) {
+export function AcademyView({
+  onStartScenario,
+  onGlossary,
+}: {
+  onStartScenario: (id: string) => void;
+  onGlossary?: () => void;
+}) {
   const academy = useUserStore((state) => state.academy);
   const soundEnabled = useUserStore((state) => state.soundEnabled);
   const recordAcademyAnswer = useUserStore((state) => state.recordAcademyAnswer);
@@ -71,6 +79,7 @@ export function AcademyView({ onStartScenario }: { onStartScenario: (id: string)
     (sum, track) => sum + trackProgress(academy, track).correct,
     0,
   );
+  const reviewCount = reviewQuestions(academy).length;
   const accuracy = overallAccuracy(academy);
   const dailyDone = academy.lastPlayed
     ? new Date(academy.lastPlayed).toDateString() === new Date().toDateString()
@@ -92,8 +101,11 @@ export function AcademyView({ onStartScenario }: { onStartScenario: (id: string)
     [tracks],
   );
 
-  function startDrill(track: DrillTrack, label: string, seed = Date.now()) {
-    const questions = pickDrill(track, 10, seed);
+  function startCustomDrill(
+    questions: AcademyQuestion[],
+    label: string,
+    track: DrillTrack = "all",
+  ) {
     if (questions.length === 0) return;
     setDrill({
       questions,
@@ -107,6 +119,10 @@ export function AcademyView({ onStartScenario }: { onStartScenario: (id: string)
       track,
       label,
     });
+  }
+
+  function startDrill(track: DrillTrack, label: string, seed = Date.now()) {
+    startCustomDrill(pickDrill(track, 10, seed), label, track);
   }
 
   function choose(optionIndex: number) {
@@ -317,7 +333,16 @@ export function AcademyView({ onStartScenario }: { onStartScenario: (id: string)
             </span>
           </div>
 
-          <h2 className="mt-3 text-base font-semibold leading-snug">{question.question}</h2>
+          <div className="mt-3 flex items-start justify-between gap-2">
+            <h2 className="text-base font-semibold leading-snug">{question.question}</h2>
+            <SpeakButton
+              compact
+              text={`${question.question} ${question.options
+                .map((option, index) => `Option ${String.fromCharCode(65 + index)}: ${option}.`)
+                .join(" ")}`}
+              label="Read the question aloud"
+            />
+          </div>
 
           <div className="mt-4 space-y-2">
             {question.options.map((option, index) => {
@@ -377,18 +402,25 @@ export function AcademyView({ onStartScenario }: { onStartScenario: (id: string)
                   : "border-amber-500/40 bg-amber-500/10",
               )}
             >
-              <p
-                className={cn(
-                  "text-xs font-semibold",
-                  isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400",
-                )}
-              >
-                {isCorrect
-                  ? drill.lastXp > 0
-                    ? `Correct — +${drill.lastXp} XP`
-                    : "Correct — already mastered, no repeat XP"
-                  : "Not quite — read the rule"}
-              </p>
+              <div className="flex items-start justify-between gap-2">
+                <p
+                  className={cn(
+                    "text-xs font-semibold",
+                    isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400",
+                  )}
+                >
+                  {isCorrect
+                    ? drill.lastXp > 0
+                      ? `Correct — +${drill.lastXp} XP`
+                      : "Correct — already mastered, no repeat XP"
+                    : "Not quite — read the rule"}
+                </p>
+                <SpeakButton
+                  compact
+                  text={`${isCorrect ? "Correct." : "Not quite."} ${question.explanation} Reference: ${question.reference}.`}
+                  label="Read the explanation aloud"
+                />
+              </div>
               <p className="mt-1 text-xs leading-relaxed">{question.explanation}</p>
               <p className="mt-2 font-mono text-[10px] text-muted-foreground">
                 {question.reference}
@@ -484,6 +516,11 @@ export function AcademyView({ onStartScenario }: { onStartScenario: (id: string)
           >
             <Target className="h-4 w-4" /> Focus: {TRACK_META[recommended].label}
           </Button>
+          {onGlossary && (
+            <Button variant="ghost" className="gap-1.5" onClick={onGlossary}>
+              <BookOpenCheck className="h-4 w-4" /> Jargon buster
+            </Button>
+          )}
           {dailyDone && (
             <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-[10px] text-emerald-600 dark:text-emerald-400">
               ✓ Practised today
@@ -491,6 +528,31 @@ export function AcademyView({ onStartScenario }: { onStartScenario: (id: string)
           )}
         </div>
       </div>
+
+      {reviewCount > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+          <div className="flex items-start gap-3">
+            <RotateCcw className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+            <div>
+              <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+                Smart review — {reviewCount} question{reviewCount === 1 ? "" : "s"} to revisit
+              </p>
+              <p className="text-xs text-amber-700/80 dark:text-amber-400/80">
+                These are the ones you missed. Get one right and it leaves the queue for good.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            className="gap-1.5"
+            onClick={() =>
+              startCustomDrill(reviewQuestions(academy).slice(0, 10), "Smart review")
+            }
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> Review now
+          </Button>
+        </div>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2">
         {tracks.map(({ track, meta, progress }) => (

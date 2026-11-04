@@ -11,10 +11,12 @@ import { ACADEMY_QUESTIONS, ACADEMY_TRACKS, overallAccuracy, trackProgress, TRAC
 import type { AcademyStats, ScenarioProgress } from "@/lib/types";
 import {
   Award,
+  BookOpenText,
   Brain,
   Flame,
   Lock,
   Play,
+  Sparkles,
   Star,
   Target,
   Trophy,
@@ -31,6 +33,8 @@ export function DashboardView({
   onStart,
   onBrowse,
   onAcademy,
+  onGlossary,
+  onTour,
 }: {
   xp: number;
   streak: number;
@@ -42,6 +46,8 @@ export function DashboardView({
   onStart: (id: string) => void;
   onBrowse: () => void;
   onAcademy: () => void;
+  onGlossary: () => void;
+  onTour: () => void;
 }) {
   const level = levelFromXp(xp);
   const next = nextLevel(xp);
@@ -88,6 +94,32 @@ export function DashboardView({
           <Button size="sm" variant="ghost" onClick={onClearNew}>
             Dismiss
           </Button>
+        </div>
+      )}
+
+      {xp === 0 && completedCount === 0 && (
+        <div className="rounded-xl border border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 via-card to-card p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+            New to the ramp?
+          </p>
+          <h2 className="mt-0.5 text-base font-bold tracking-tight">
+            Start here — you do not need any experience
+          </h2>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+            Learn the words, drill the rules, then run a shift with the coach beside you. Three
+            minutes is enough to begin.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button size="sm" className="gap-1.5" onClick={onTour}>
+              <Sparkles className="h-3.5 w-3.5" /> 60-second tour
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={onAcademy}>
+              <Brain className="h-3.5 w-3.5" /> Try 10 questions
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={onGlossary}>
+              <BookOpenText className="h-3.5 w-3.5" /> Learn the words
+            </Button>
+          </div>
         </div>
       )}
 
@@ -156,6 +188,9 @@ export function DashboardView({
           </div>
           <Button size="sm" className="h-8 gap-1.5 text-xs" onClick={onAcademy}>
             <Play className="h-3.5 w-3.5" /> Enter the gym
+          </Button>
+          <Button size="sm" variant="ghost" className="h-8 gap-1.5 text-xs" onClick={onGlossary}>
+            <BookOpenText className="h-3.5 w-3.5" /> Words
           </Button>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">

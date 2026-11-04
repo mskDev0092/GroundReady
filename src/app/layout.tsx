@@ -15,20 +15,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AltéaMaster — SAPS Ground Handling & DCS Trainer",
+  title: "GroundReady — Aviation Ground Operations Trainer",
+  applicationName: "GroundReady",
   description:
-    "Gamified Amadeus Altéa DCS and airport ground-handling training for Traffic Assistants: check-in, boarding, IATA DGR 2026, GACA liquids, TIMATIC, overbooking and gate security scenarios.",
+    "Beginner-friendly, gamified ground-operations training for airport traffic assistants: Amadeus Altéa DCS, IATA DGR 2026, IGOM turnaround, IATA passenger rules and SAPS procedures.",
   keywords: [
+    "GroundReady",
+    "ground handling",
+    "ground operations",
     "Altéa",
     "DCS",
     "IATA",
-    "GACA",
-    "SAPS",
-    "ground handling",
-    "check-in",
+    "DGR",
+    "IGOM",
     "TIMATIC",
+    "SAPS",
+    "check-in",
     "dangerous goods",
   ],
+  openGraph: {
+    title: "GroundReady — Aviation Ground Operations Trainer",
+    description:
+      "From first shift to station manager: gamified DCS, DGR, IGOM and IATA training for airport ground staff.",
+    siteName: "GroundReady",
+    type: "website",
+  },
   icons: {
     icon: "/logo.svg",
   },
