@@ -51,16 +51,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Next.js 16 requires Node.js 20.9+; use the current LTS line.
+          node-version: "22"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v5
-        with:
-          # Automatically inject basePath in your Next.js configuration file and disable
-          # server side image optimization (https://nextjs.org/docs/api-reference/next/image#unoptimized).
-          #
-          # You may remove this line if you want to manage the configuration yourself.
-          static_site_generator: next
+        # The site is configured in next.config.ts, so we deliberately do not
+        # pass static_site_generator: next. That option only edits
+        # next.config.js/.mjs/.cjs and would create a conflicting config file.
       - name: Restore cache
         uses: actions/cache@v4
         with:
@@ -74,6 +73,10 @@ jobs:
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js
+        env:
+          NEXT_STATIC_EXPORT: "true"
+          # GitHub Pages project sites are served from /<repository>.
+          NEXT_BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

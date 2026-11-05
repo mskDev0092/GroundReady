@@ -62,9 +62,12 @@ base path. The default production build remains a Next.js standalone build.
 ## Deploy with GitHub Pages
 
 The workflow in
-[`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml)
-tests the project, builds the static site, and deploys it whenever changes are
-pushed to `main` (or when manually run).
+[`.github/workflows/nextjs.yml`](./.github/workflows/nextjs.yml) is the
+GitHub-provided Next.js Pages workflow. It installs dependencies with
+`npm ci`, builds the static site, and deploys it whenever changes are pushed to
+`main` (or when manually run). It uses Node.js 22 and derives the Pages base
+path (for example `/GroundReady`) from `actions/configure-pages`, so the site
+keeps working if the repository is renamed.
 
 1. Push the repository to GitHub.
 2. In **Settings → Pages**, set **Build and deployment → Source** to **GitHub
@@ -73,9 +76,9 @@ pushed to `main` (or when manually run).
 4. Visit <https://mskdev0092.github.io/GroundReady/>.
 
 The workflow needs the repository's standard `GITHUB_TOKEN` with Pages write
-and OIDC permissions; no deployment secrets are required. If the repository is
-renamed, update the `/GroundReady` base path in `package.json` and the URL
-above.
+and OIDC permissions; no deployment secrets are required. Keep
+`package.json` and `package-lock.json` in sync when dependencies change, because
+the workflow uses `npm ci`.
 
 ## Project layout
 

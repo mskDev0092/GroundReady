@@ -41,6 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 local-*
+!tests/helpers/local-storage.ts
 .claude
 *.log
 dev.log

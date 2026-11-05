@@ -2,10 +2,13 @@
   "name": "groundready",
   "version": "0.3.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
     "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
-    "build:pages": "NEXT_STATIC_EXPORT=true NEXT_BASE_PATH=/GroundReady next build",
+    "build:pages": "NEXT_STATIC_EXPORT=true NEXT_BASE_PATH=${NEXT_BASE_PATH:-/GroundReady} next build",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "test": "bun test",
     "test:scenarios": "bun test tests/scenarios.test.ts",
