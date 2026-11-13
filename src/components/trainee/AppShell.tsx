@@ -38,7 +38,7 @@ import { getScenario, SCENARIOS } from "@/data/scenarios";
 import { levelFromXp } from "@/data/gamification";
 import { sfx } from "@/lib/sound";
 import { cn } from "@/lib/utils";
-import type { ViewName } from "@/lib/types";
+import type { AcademyTab, ViewName } from "@/lib/types";
 import {
   BookOpenCheck,
   BookOpenText,
@@ -74,6 +74,7 @@ export function AppShell() {
   const [scenarioId, setScenarioId] = useState<string | null>(null);
   const [simKey, setSimKey] = useState(0);
   const [tourRequested, setTourRequested] = useState(false);
+  const [academyTab, setAcademyTab] = useState<AcademyTab>("gym");
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
@@ -132,6 +133,14 @@ export function AppShell() {
     setView(v);
     window.scrollTo({ top: 0 });
   }, []);
+
+  const openAcademy = useCallback(
+    (tab: AcademyTab = "gym") => {
+      setAcademyTab(tab);
+      go("academy");
+    },
+    [go],
+  );
 
   if (!mounted) {
     return (
@@ -323,7 +332,8 @@ export function AppShell() {
                 onClearNew={clearNewlyUnlocked}
                 onStart={startScenario}
                 onBrowse={() => go("scenarios")}
-                onAcademy={() => go("academy")}
+                onAcademy={() => openAcademy("gym")}
+                onPaxPathway={() => openAcademy("pax")}
                 onGlossary={() => go("glossary")}
                 onTour={() => setTourRequested(true)}
               />
@@ -332,7 +342,12 @@ export function AppShell() {
               <ScenariosView progress={progress} onStart={startScenario} />
             )}
             {view === "academy" && (
-              <AcademyView onStartScenario={startScenario} onGlossary={() => go("glossary")} />
+              <AcademyView
+                tab={academyTab}
+                onTabChange={setAcademyTab}
+                onStartScenario={startScenario}
+                onGlossary={() => go("glossary")}
+              />
             )}
             {view === "glossary" && (
               <GlossaryView onStartScenario={startScenario} />
@@ -354,7 +369,7 @@ export function AppShell() {
                 onRetry={() => startScenario(lastResult.scenarioId)}
                 onNext={() => nextScenarioAfter && startScenario(nextScenarioAfter.id)}
                 onDashboard={() => go("dashboard")}
-                onAcademy={() => go("academy")}
+                onAcademy={() => openAcademy("gym")}
               />
             )}
           </motion.div>

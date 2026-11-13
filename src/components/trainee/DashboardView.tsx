@@ -8,11 +8,13 @@ import { cn } from "@/lib/utils";
 import { BADGES, LEVELS, levelFromXp, nextLevel } from "@/data/gamification";
 import { SCENARIOS, isUnlocked } from "@/data/scenarios";
 import { ACADEMY_QUESTIONS, ACADEMY_TRACKS, overallAccuracy, trackProgress, TRACK_META } from "@/data/academy";
+import { paxPathwayProgress } from "@/data/pax";
 import type { AcademyStats, ScenarioProgress } from "@/lib/types";
 import {
   Award,
   BookOpenText,
   Brain,
+  Compass,
   Flame,
   Lock,
   Play,
@@ -33,6 +35,7 @@ export function DashboardView({
   onStart,
   onBrowse,
   onAcademy,
+  onPaxPathway,
   onGlossary,
   onTour,
 }: {
@@ -46,6 +49,7 @@ export function DashboardView({
   onStart: (id: string) => void;
   onBrowse: () => void;
   onAcademy: () => void;
+  onPaxPathway: () => void;
   onGlossary: () => void;
   onTour: () => void;
 }) {
@@ -71,6 +75,7 @@ export function DashboardView({
       })),
     [academy],
   );
+  const paxPathway = useMemo(() => paxPathwayProgress(academy), [academy]);
   const nextScenario = SCENARIOS.find(
     (s) => !progress[s.id]?.completed && isUnlocked(s, progress),
   );
@@ -205,6 +210,46 @@ export function DashboardView({
                 </span>
               </div>
               <Progress value={trackStat.mastery} className="mt-1.5 h-1" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* AHM 1110 passenger pathway */}
+      <div className="rounded-xl border border-sky-500/30 bg-gradient-to-br from-sky-500/10 via-card to-card p-4">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <h2 className="flex items-center gap-2 text-sm font-semibold">
+              <Compass className="h-4 w-4 text-sky-500" /> AHM 1110 Passenger Pathway
+            </h2>
+            <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
+              {paxPathway.next
+                ? `Next step: ${paxPathway.next.code} — ${paxPathway.next.title}. ${paxPathway.next.tellsTA}`
+                : "All 14 modules are at mastery. Replay any step to keep the rules sharp."}
+            </p>
+          </div>
+          <Button size="sm" className="h-8 gap-1.5 text-xs" onClick={onPaxPathway}>
+            <Play className="h-3.5 w-3.5" /> Open pathway
+          </Button>
+        </div>
+
+        <div className="mt-3 flex items-center gap-2">
+          <Progress value={paxPathway.mastery} className="h-2" />
+          <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+            {paxPathway.completed}/{paxPathway.modules.length} modules · {paxPathway.mastery}%
+          </span>
+        </div>
+
+        <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-3">
+          {paxPathway.stages.map(({ stage, completed: done, modules: stageModules, mastery }) => (
+            <div key={stage} className="rounded-lg border bg-background/50 px-3 py-2">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] font-semibold">{stage}</span>
+                <span className="font-mono text-[10px] text-muted-foreground">
+                  {done}/{stageModules}
+                </span>
+              </div>
+              <Progress value={mastery} className="mt-1.5 h-1" />
             </div>
           ))}
         </div>

@@ -211,6 +211,14 @@ export const BADGES: BadgeDef[] = [
     requirement: "Answer 12 questions correctly in every Knowledge Gym track",
   },
   {
+    id: "pax-pathway-graduate",
+    name: "AHM 1110 Pathway Graduate",
+    icon: "🧭",
+    description:
+      "Worked through every passenger-handling module from aviation basics to boarding-bridge operations.",
+    requirement: "Master all 14 AHM 1110 pathway modules at 70% or better",
+  },
+  {
     id: "perfect-ten",
     name: "Perfect Ten",
     icon: "🔥",

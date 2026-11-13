@@ -1,4 +1,5 @@
 import type { AcademyQuestion, AcademyStats, AcademyTrack } from "@/lib/types";
+import { PAX_QUESTIONS } from "./pax-questions";
 
 /**
  * Knowledge Gym — micro-drills for the competencies a SAPS traffic assistant
@@ -1288,6 +1289,10 @@ ACADEMY_QUESTIONS.push(
     "m9-namefix",
   ),
 );
+
+/* ------------------------- AHM 1110 PAX pathway ------------------------- */
+
+ACADEMY_QUESTIONS.push(...PAX_QUESTIONS);
 
 /** Number of questions per track (used by the UI and tests). */
 export function trackQuestionCount(track: AcademyTrack): number {

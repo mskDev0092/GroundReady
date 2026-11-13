@@ -300,6 +300,48 @@ export interface ScenarioProgress {
 
 export type AcademyTrack = "DGR" | "IGOM" | "IATA" | "SAPS";
 
+export type AcademyTab = "gym" | "pax";
+
+/**
+ * IATA AHM 1110 passenger-handling module codes. Local operators may number
+ * PAX 09/10 or PAX 15 differently, so the pathway keeps the industry labels
+ * and calls out the common variants.
+ */
+export type PaxModuleCode =
+  | "GEN 01"
+  | "PAX 01"
+  | "PAX 02"
+  | "PAX 03"
+  | "PAX 04"
+  | "PAX 05"
+  | "PAX 06"
+  | "PAX 07"
+  | "PAX 08"
+  | "PAX 09/10"
+  | "PAX 11"
+  | "PAX 12"
+  | "PAX 13"
+  | "PAX 14";
+
+export type PaxStage = "Foundation" | "Core" | "Advanced";
+
+export interface PaxModule {
+  code: PaxModuleCode;
+  title: string;
+  stage: PaxStage;
+  icon: string;
+  /** Short syllabus summary shown on the module card. */
+  covers: string;
+  /** Why the module matters to a traffic assistant on shift. */
+  tellsTA: string;
+  /** Three non-negotiable rules the learner should remember. */
+  keyRules: string[];
+  /** Existing Knowledge Gym track that carries the module's drills. */
+  track: AcademyTrack;
+  /** Scenario modules that practise the same competency. */
+  scenarioIds: string[];
+}
+
 export interface AcademyQuestion {
   id: string;
   track: AcademyTrack;
@@ -315,6 +357,8 @@ export interface AcademyQuestion {
   reference: string;
   /** Optional scenario that practises the same competency. */
   scenarioId?: string;
+  /** Optional IATA AHM 1110 module this question belongs to. */
+  paxModule?: PaxModuleCode;
 }
 
 export interface AcademyStats {

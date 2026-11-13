@@ -24,6 +24,9 @@ available at
   immediate explanations.
 - Build knowledge with short quizzes, smart review, a glossary, and read-aloud
   support.
+- Follow the IATA AHM 1110 passenger-handling pathway — 14 guided modules from
+  aviation basics and check-in to IRROPS, PRM, load information and boarding
+  bridges — with dedicated drills and scenario links for each step.
 - Track experience, badges, streaks, and scenario progress.
 - Use light or dark theme and adjust sound and coaching preferences.
 
@@ -84,7 +87,8 @@ the workflow uses `npm ci`.
 
 - `src/app/` — Next.js application shell and route handlers.
 - `src/components/trainee/` — training views and simulator UI.
-- `src/data/` — scenario, academy, glossary, and gamification content.
+- `src/data/` — scenario, academy, AHM 1110 passenger pathway, glossary, and
+  gamification content.
 - `src/lib/` — scoring, terminal command, sound, and shared utilities.
 - `tests/` — scenario, scoring, progression, academy, and state tests.
 

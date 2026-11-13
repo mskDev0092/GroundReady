@@ -10,6 +10,7 @@ import {
   findQuestion,
   questionXp,
 } from "@/data/academy";
+import { earnedPaxBadges } from "@/data/pax";
 
 export const STORAGE_KEY = "groundready-progress-v1";
 export const LEGACY_STORAGE_KEY = "alteamaster-progress-v1";
@@ -192,9 +193,9 @@ export const useUserStore = create<UserStoreState>()(
           lastPlayed: new Date().toISOString(),
         };
 
-        const newBadges = earnedAcademyBadges(academy).filter(
-          (badgeId) => !state.badges.includes(badgeId),
-        );
+        const newBadges = [
+          ...new Set([...earnedAcademyBadges(academy), ...earnedPaxBadges(academy)]),
+        ].filter((badgeId) => !state.badges.includes(badgeId));
 
         set({
           xp: Math.min(MAX_XP, state.xp + xpAwarded),

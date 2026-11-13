@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sfx } from "@/lib/sound";
 import { getScenario } from "@/data/scenarios";
 import { BADGES } from "@/data/gamification";
+import { paxModuleQuestions } from "@/data/pax";
 import {
   ACADEMY_QUESTIONS,
   ACADEMY_TRACKS,
@@ -20,13 +21,16 @@ import {
   trackProgress,
   TRACK_META,
 } from "@/data/academy";
-import type { AcademyQuestion, AcademyTrack } from "@/lib/types";
+import type { AcademyQuestion, AcademyTab, AcademyTrack, PaxModuleCode } from "@/lib/types";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SpeakButton } from "./SpeakButton";
+import { PaxPathway } from "./PaxPathway";
 import {
   ArrowRight,
   BookOpenCheck,
   Brain,
   CheckCircle2,
+  Compass,
   Flame,
   Play,
   RotateCcw,
@@ -50,14 +54,20 @@ interface Drill {
   lastXp: number;
   track: DrillTrack;
   label: string;
+  /** Set when the drill is an AHM 1110 pathway module, so replay stays on-module. */
+  paxModule?: PaxModuleCode;
 }
 
 const DIFFICULTY_LABEL = ["", "Foundation", "Operational", "Expert"];
 
 export function AcademyView({
+  tab,
+  onTabChange,
   onStartScenario,
   onGlossary,
 }: {
+  tab: AcademyTab;
+  onTabChange: (tab: AcademyTab) => void;
   onStartScenario: (id: string) => void;
   onGlossary?: () => void;
 }) {
@@ -105,6 +115,7 @@ export function AcademyView({
     questions: AcademyQuestion[],
     label: string,
     track: DrillTrack = "all",
+    paxModule?: PaxModuleCode,
   ) {
     if (questions.length === 0) return;
     setDrill({
@@ -118,11 +129,16 @@ export function AcademyView({
       lastXp: 0,
       track,
       label,
+      ...(paxModule ? { paxModule } : {}),
     });
   }
 
   function startDrill(track: DrillTrack, label: string, seed = Date.now()) {
     startCustomDrill(pickDrill(track, 10, seed), label, track);
+  }
+
+  function startPaxModule(code: PaxModuleCode) {
+    startCustomDrill(paxModuleQuestions(code), `${code} pathway`, "all", code);
   }
 
   function choose(optionIndex: number) {
@@ -269,12 +285,16 @@ export function AcademyView({
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Button
               className="gap-1.5"
-              onClick={() => startDrill(drill.track, drill.label, Date.now() + 1)}
+              onClick={() =>
+                drill.paxModule
+                  ? startPaxModule(drill.paxModule)
+                  : startDrill(drill.track, drill.label, Date.now() + 1)
+              }
             >
               <RotateCcw className="h-4 w-4" /> Drill again
             </Button>
             <Button variant="outline" onClick={() => setDrill(null)}>
-              Back to gym
+              Back to {tab === "pax" ? "pathway" : "gym"}
             </Button>
           </div>
         </div>
@@ -467,8 +487,27 @@ export function AcademyView({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
-      <div className="rounded-xl border bg-gradient-to-br from-emerald-500/10 via-card to-card p-5">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
+      <Tabs value={tab} onValueChange={(value) => onTabChange(value as AcademyTab)}>
+        <TabsList className="grid w-full max-w-xs grid-cols-2">
+          <TabsTrigger value="gym" className="gap-1.5 text-xs">
+            <Brain className="h-3.5 w-3.5" /> Knowledge Gym
+          </TabsTrigger>
+          <TabsTrigger value="pax" className="gap-1.5 text-xs">
+            <Compass className="h-3.5 w-3.5" /> PAX pathway
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {tab === "pax" ? (
+        <PaxPathway
+          academy={academy}
+          onDrill={startPaxModule}
+          onStartScenario={onStartScenario}
+        />
+      ) : (
+        <div className="flex w-full flex-col gap-4">
+          <div className="rounded-xl border bg-gradient-to-br from-emerald-500/10 via-card to-card p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">
@@ -620,7 +659,9 @@ export function AcademyView({
             correct answers. The Academy Graduate badge needs all four tracks.
           </p>
         </div>
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

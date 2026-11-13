@@ -110,7 +110,7 @@ export function OnboardingDialog({
             <TourRow
               icon={<Brain className="h-4 w-4 text-violet-500" />}
               title="2 · Drill the rules"
-              text="The Knowledge Gym asks short questions, explains every answer, and revisits your mistakes."
+              text="The Knowledge Gym asks short questions and explains every answer. The PAX tab follows the 14-module AHM 1110 passenger pathway."
             />
             <TourRow
               icon={<Play className="h-4 w-4 text-emerald-500" />}

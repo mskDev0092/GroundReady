@@ -23,6 +23,7 @@ bun run validate         # legacy catalogue validator
 | `store.test.ts` | Persisted Zustand progress: best score/time, attempts, XP cap, badge duplication, reset. |
 | `gamification.test.ts` | Level boundaries, XP cap and badge registry integrity. |
 | `academy.test.ts` | Knowledge Gym question-bank integrity, deterministic drills, daily seed, track mastery, academy badges, smart-review queue and store XP/combo behaviour. |
+| `pax.test.ts` | IATA AHM 1110 pathway integrity: 14 modules, dedicated and mapped question sets, scenario links, mastery threshold, pathway progress and next-step logic. |
 | `glossary.test.ts` | Jargon-buster integrity: unique terms, plain-language meanings, category coverage, search and deterministic term of the day. |
 | `helpers/` | Shared perfect-run simulator, in-memory `localStorage` and step scoring helpers. |
 
@@ -33,10 +34,13 @@ bun run validate         # legacy catalogue validator
   badge.
 - Every Knowledge Gym question has four options, one valid answer, a full
   explanation, a source reference and an optional link to a real scenario.
+- Every AHM 1110 pathway module has dedicated questions, mapped gym questions,
+  at least three key rules, a valid track and scenario links; module mastery
+  drives the pathway's next step.
 - Every glossary term has a plain-language meaning, a shift example, a valid
   category and optional scenario link; search is deterministic.
-- The 18-scenario campaign now spans **24 badges** and seven levels, from
-  Trainee T/A to Station Manager.
+- The 18-scenario campaign and Knowledge Gym now share **25 badges** and seven
+  levels, from Trainee T/A to Station Manager.
 
 ## Beginner aids
 
